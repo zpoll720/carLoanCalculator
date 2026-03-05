@@ -2,6 +2,7 @@ package com.example.carloancalc
 
 import android.R
 import android.R.attr.text
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -41,6 +43,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.carloancalc.ui.theme.CarLoanCalcTheme
 import kotlin.math.pow
 
@@ -61,18 +64,29 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun CarLoanScreen(modifier: Modifier = Modifier) {
+fun CarLoanScreen(modifier: Modifier = Modifier, carLoanViewModel: CarLoanViewModel = viewModel()) {
+    if(LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        CarLoanPortrait(modifier, carLoanViewModel)
+    } else {
+        CarLoanLandscape(modifier, carLoanViewModel)
+    }
+}
+
+//DisplayA
+@Composable
+fun CarLoanPortrait(modifier: Modifier = Modifier, carLoanViewModel: CarLoanViewModel) {
+
     //inputs
-    var price by remember { mutableStateOf("") }
-    var downPayment by remember { mutableStateOf("") }
-    var iRate by remember { mutableFloatStateOf(0.0f) }
+//    var price by remember { mutableStateOf("") }
+//    var downPayment by remember { mutableStateOf("") }
+//    var iRate by remember { mutableFloatStateOf(0.0f) }
 //    var yearsLeft by remember { mutableStateOf("") }
 
     //Hoisted variable was named optionSelected
-    var yearsLeft by remember { mutableStateOf("0.0") }
+//    var yearsLeft by remember { mutableStateOf("0.0") }
 
-    //output
-    var monthlyPayment by remember { mutableDoubleStateOf(0.00) }
+//    //output
+//    var monthlyPayment by remember { mutableDoubleStateOf(0.00) }
 
     Column (
         horizontalAlignment = Alignment.Start,
@@ -86,9 +100,9 @@ fun CarLoanScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(bottom = 18.dp)
         )
         TextField (
-            value = price,
+            value = carLoanViewModel.price,
             onValueChange = {
-                price = it
+                carLoanViewModel.price = it
             },
             label = { Text("Price of Car?") },
             singleLine = true,  //the textbox will not expand
@@ -98,9 +112,9 @@ fun CarLoanScreen(modifier: Modifier = Modifier) {
             )
         )
         TextField (
-            value = downPayment,
+            value = carLoanViewModel.downPayment,
             onValueChange = {
-                downPayment = it
+                carLoanViewModel.downPayment = it
             },
             label = { Text("Down Payment?") },
             singleLine = true,
@@ -117,16 +131,16 @@ fun CarLoanScreen(modifier: Modifier = Modifier) {
 //            modifier = modifier.padding(10.dp)
         ) {
             Slider (
-                value = iRate,
+                value = carLoanViewModel.iRate,
                 onValueChange = { it ->
-                    iRate = it
+                    carLoanViewModel.iRate = it
                 },
                 valueRange = 0.00f..20.00f,
 //                steps = 20
             )
         }
-        iRate = "%.2f".format(iRate).toFloat()
-        Text("Value: ${iRate}%")
+        carLoanViewModel.iRate = "%.2f".format(carLoanViewModel.iRate).toFloat()
+        Text("Value: ${carLoanViewModel.iRate}%")
 
         //timeLeft
         val radioOptions = listOf ("3", "4", "5", "6")
@@ -143,23 +157,23 @@ fun CarLoanScreen(modifier: Modifier = Modifier) {
         //builds radio buttons
         RadioGroup(
             radioOptions = listOf("Three", "Four", "Five", "Six"),
-            optionSelected = yearsLeft,
-            onSelect = { yearsLeft = it}  //it is the parameter of the function which is option
+            optionSelected = carLoanViewModel.yearsLeft,
+            onSelect = { carLoanViewModel.yearsLeft = it}  //it is the parameter of the function which is option
         )
 
 
         //format and output variables
-        monthlyPayment = "%.2f".format(monthlyPayment).toDouble()
-//        Text("Price: $price")
-//        Text("Down Payment: $downPayment")
-//        Text("Interest Rate: $iRate")
-//        Text("Years Remaining: $yearsLeft")
+        carLoanViewModel.monthlyPayment = "%.2f".format(carLoanViewModel.monthlyPayment).toDouble()
+//        Text("Price: ${carLoanViewModel.price}")
+//        Text("Down Payment: ${carLoanViewModel.downPayment}")
+//        Text("Interest Rate: ${carLoanViewModel.iRate}")
+//        Text("Years Remaining: ${carLoanViewModel.yearsLeft}")
         Text(
             text = buildAnnotatedString {
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                     append("Monthly Payment: ")
                 }
-                append("$$monthlyPayment")
+                append("$${carLoanViewModel.monthlyPayment}")
             }
         )
 
@@ -168,7 +182,8 @@ fun CarLoanScreen(modifier: Modifier = Modifier) {
         Button (
             onClick = {
 //                callFcn = true
-                monthlyPayment = calcMonthlyPayment(price.toDouble(), downPayment.toDouble(), iRate/100/12, yearsLeft)
+                carLoanViewModel.monthlyPayment = calcMonthlyPayment(carLoanViewModel.price.toDouble(),
+                    carLoanViewModel.downPayment.toDouble(), carLoanViewModel.iRate/100/12, carLoanViewModel.yearsLeft)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -181,6 +196,133 @@ fun CarLoanScreen(modifier: Modifier = Modifier) {
     }
 
 }
+
+
+//DisplayB
+@Composable
+fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanViewModel) {
+
+    //inputs
+//    var price by remember { mutableStateOf("") }
+//    var downPayment by remember { mutableStateOf("") }
+//    var iRate by remember { mutableFloatStateOf(0.0f) }
+//    var yearsLeft by remember { mutableStateOf("") }
+
+    //Hoisted variable was named optionSelected
+//    var yearsLeft by remember { mutableStateOf("0.0") }
+
+//    //output
+//    var monthlyPayment by remember { mutableDoubleStateOf(0.00) }
+
+    Column (
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.SpaceEvenly,
+        modifier = modifier.padding(10.dp).fillMaxSize()
+    ) {
+        Text (
+            text = "Car Loan Calculator",
+            fontWeight = FontWeight.Bold,
+            fontSize = 40.sp,
+            modifier = Modifier.padding(bottom = 18.dp)
+        )
+        TextField (
+            value = carLoanViewModel.price,
+            onValueChange = {
+                carLoanViewModel.price = it
+            },
+            label = { Text("Price of Car?") },
+            singleLine = true,  //the textbox will not expand
+            //the keyboard that pops up only contains numbers
+            keyboardOptions = KeyboardOptions (
+                keyboardType = KeyboardType.Number
+            )
+        )
+        TextField (
+            value = carLoanViewModel.downPayment,
+            onValueChange = {
+                carLoanViewModel.downPayment = it
+            },
+            label = { Text("Down Payment?") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions (
+                keyboardType = KeyboardType.Number
+            )
+        )
+
+
+        Text (
+            text = "Interest Rate: "
+        )
+        Row (
+//            modifier = modifier.padding(10.dp)
+        ) {
+            Slider (
+                value = carLoanViewModel.iRate,
+                onValueChange = { it ->
+                    carLoanViewModel.iRate = it
+                },
+                valueRange = 0.00f..20.00f,
+//                steps = 20
+            )
+        }
+        carLoanViewModel.iRate = "%.2f".format(carLoanViewModel.iRate).toFloat()
+        Text("Value: ${carLoanViewModel.iRate}%")
+
+        //timeLeft
+        val radioOptions = listOf ("3", "4", "5", "6")
+//        Text (
+//            text = "Years Remaining: "
+//        )
+//        TextField(
+//            value = yearsLeft,
+//            onValueChange = {
+//                yearsLeft = it
+//            }
+//        )
+
+        //builds radio buttons
+        RadioGroup(
+            radioOptions = listOf("Three", "Four", "Five", "Six"),
+            optionSelected = carLoanViewModel.yearsLeft,
+            onSelect = { carLoanViewModel.yearsLeft = it}  //it is the parameter of the function which is option
+        )
+
+
+        //format and output variables
+        carLoanViewModel.monthlyPayment = "%.2f".format(carLoanViewModel.monthlyPayment).toDouble()
+//        Text("Price: ${carLoanViewModel.price}")
+//        Text("Down Payment: ${carLoanViewModel.downPayment}")
+//        Text("Interest Rate: ${carLoanViewModel.iRate}")
+//        Text("Years Remaining: ${carLoanViewModel.yearsLeft}")
+        Text(
+            text = buildAnnotatedString {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("Monthly Payment: ")
+                }
+                append("$${carLoanViewModel.monthlyPayment}")
+            }
+        )
+
+//        var callFcn by remember { mutableStateOf(false) }
+
+        Button (
+            onClick = {
+//                callFcn = true
+                carLoanViewModel.monthlyPayment = calcMonthlyPayment(carLoanViewModel.price.toDouble(),
+                    carLoanViewModel.downPayment.toDouble(), carLoanViewModel.iRate/100/12, carLoanViewModel.yearsLeft)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Compute")
+        }
+//        if (callFcn) {
+//            callFcn = false
+//            monthlyPayment = calcMonthlyPayment(price.toDouble(), downPayment.toDouble(), iRate/100/12, yearsLeft.toInt())
+//        }
+    }
+
+}
+
 //@Composable
 //*******when all inputs are null, the screen crashes. Why?
 fun calcMonthlyPayment(pr: Double, dp: Double, iR: Float, yearsString: String): Double {
