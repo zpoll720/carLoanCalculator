@@ -1,7 +1,5 @@
 package com.example.carloancalc
 
-import android.R
-import android.R.attr.text
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,6 +43,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat.enableEdgeToEdge
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.carloancalc.ui.theme.CarLoanCalcTheme
 import kotlin.math.pow
@@ -213,49 +214,75 @@ fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanVie
 
 //    //output
 //    var monthlyPayment by remember { mutableDoubleStateOf(0.00) }
-
-    Column (
-        horizontalAlignment = Alignment.Start,
+    Column(
+//        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly,
-        modifier = modifier.padding(10.dp).fillMaxSize()
+        modifier = modifier.padding(5.dp)
     ) {
-        Text (
-            text = "Car Loan Calculator",
-            fontWeight = FontWeight.Bold,
-            fontSize = 40.sp,
-            modifier = Modifier.padding(bottom = 18.dp)
-        )
-        TextField (
-            value = carLoanViewModel.price,
-            onValueChange = {
-                carLoanViewModel.price = it
-            },
-            label = { Text("Price of Car?") },
-            singleLine = true,  //the textbox will not expand
-            //the keyboard that pops up only contains numbers
-            keyboardOptions = KeyboardOptions (
-                keyboardType = KeyboardType.Number
-            )
-        )
-        TextField (
-            value = carLoanViewModel.downPayment,
-            onValueChange = {
-                carLoanViewModel.downPayment = it
-            },
-            label = { Text("Down Payment?") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions (
-                keyboardType = KeyboardType.Number
-            )
-        )
-
-
-        Text (
-            text = "Interest Rate: "
-        )
         Row (
-//            modifier = modifier.padding(10.dp)
+            horizontalArrangement = Arrangement.Start,
+//            verticalAlignment = Alignment.Top,
+            modifier = modifier.padding(0.dp).fillMaxWidth()
         ) {
+            Text(
+                text = "Car Loan Calculator",
+                fontWeight = FontWeight.Bold,
+                fontSize = 40.sp,
+                modifier = Modifier.padding(end = 300.dp)
+            )
+
+            Button (
+                onClick = {
+//                callFcn = true
+                    carLoanViewModel.monthlyPayment = calcMonthlyPayment(carLoanViewModel.price.toDouble(),
+                        carLoanViewModel.downPayment.toDouble(), carLoanViewModel.iRate/100/12, carLoanViewModel.yearsLeft)
+                },
+                modifier = Modifier.width(200.dp)
+            ) {
+                Text("Compute")
+            }
+        }
+        Row (
+//        horizontalArrangement = Arrangement.SpaceEvenly,
+//        verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier.padding(0.dp)
+        ) {
+            TextField (
+                value = carLoanViewModel.price,
+                onValueChange = {
+                    carLoanViewModel.price = it
+                },
+                label = { Text("Price of Car?") },
+                singleLine = true,  //the textbox will not expand
+                //the keyboard that pops up only contains numbers
+                keyboardOptions = KeyboardOptions (
+                    keyboardType = KeyboardType.Number
+                ),
+                modifier = Modifier.size(200.dp, 25.dp).padding(end = 10.dp)
+            )
+            TextField (
+                value = carLoanViewModel.downPayment,
+                onValueChange = {
+                    carLoanViewModel.downPayment = it
+                },
+                label = { Text("Down Payment?") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions (
+                    keyboardType = KeyboardType.Number
+                ),
+                modifier = Modifier.size(200.dp, 25.dp)
+            )
+        }
+
+        Row (
+
+        ) {
+            Text (
+                text = "Interest Rate: "
+            )
+//        Row (
+//            modifier = modifier.padding(10.dp)
+//        ) {
             Slider (
                 value = carLoanViewModel.iRate,
                 onValueChange = { it ->
@@ -263,13 +290,18 @@ fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanVie
                 },
                 valueRange = 0.00f..20.00f,
 //                steps = 20
+                modifier = Modifier.size(200.dp, 25.dp)
             )
+//        }
+            carLoanViewModel.iRate = "%.2f".format(carLoanViewModel.iRate).toFloat()
+            Text("Value: ${carLoanViewModel.iRate}%")
         }
-        carLoanViewModel.iRate = "%.2f".format(carLoanViewModel.iRate).toFloat()
-        Text("Value: ${carLoanViewModel.iRate}%")
 
-        //timeLeft
-        val radioOptions = listOf ("3", "4", "5", "6")
+
+
+
+            //timeLeft
+            val radioOptions = listOf ("3", "4", "5", "6")
 //        Text (
 //            text = "Years Remaining: "
 //        )
@@ -280,48 +312,50 @@ fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanVie
 //            }
 //        )
 
-        //builds radio buttons
-        RadioGroup(
-            radioOptions = listOf("Three", "Four", "Five", "Six"),
-            optionSelected = carLoanViewModel.yearsLeft,
-            onSelect = { carLoanViewModel.yearsLeft = it}  //it is the parameter of the function which is option
-        )
+        Row (
+            modifier = modifier.padding(10.dp)
+        ) {
+            //builds radio buttons
+            RadioGroup(
+                radioOptions = listOf("Three", "Four", "Five", "Six"),
+                optionSelected = carLoanViewModel.yearsLeft,
+                onSelect = { carLoanViewModel.yearsLeft = it}  //it is the parameter of the function which is option
+            )
+        }
 
 
-        //format and output variables
-        carLoanViewModel.monthlyPayment = "%.2f".format(carLoanViewModel.monthlyPayment).toDouble()
+
+            //format and output variables
+            carLoanViewModel.monthlyPayment = "%.2f".format(carLoanViewModel.monthlyPayment).toDouble()
 //        Text("Price: ${carLoanViewModel.price}")
 //        Text("Down Payment: ${carLoanViewModel.downPayment}")
 //        Text("Interest Rate: ${carLoanViewModel.iRate}")
 //        Text("Years Remaining: ${carLoanViewModel.yearsLeft}")
-        Text(
-            text = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append("Monthly Payment: ")
+//    Row (
+//        modifier = modifier.padding(10.dp)
+//    ) {
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Monthly Payment: ")
+                    }
+                    append("$${carLoanViewModel.monthlyPayment}")
                 }
-                append("$${carLoanViewModel.monthlyPayment}")
-            }
-        )
+            )
 
 //        var callFcn by remember { mutableStateOf(false) }
 
-        Button (
-            onClick = {
-//                callFcn = true
-                carLoanViewModel.monthlyPayment = calcMonthlyPayment(carLoanViewModel.price.toDouble(),
-                    carLoanViewModel.downPayment.toDouble(), carLoanViewModel.iRate/100/12, carLoanViewModel.yearsLeft)
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Compute")
-        }
 //        if (callFcn) {
 //            callFcn = false
 //            monthlyPayment = calcMonthlyPayment(price.toDouble(), downPayment.toDouble(), iRate/100/12, yearsLeft.toInt())
 //        }
+//        }
     }
 
+
 }
+
+
 
 //@Composable
 //*******when all inputs are null, the screen crashes. Why?
