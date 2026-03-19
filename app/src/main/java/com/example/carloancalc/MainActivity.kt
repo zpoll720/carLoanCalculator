@@ -156,7 +156,7 @@ fun CarLoanPortrait(modifier: Modifier = Modifier, carLoanViewModel: CarLoanView
 //        )
 
         //builds radio buttons
-        RadioGroup(
+        RadioGroupPortrait(
             radioOptions = listOf("Three", "Four", "Five", "Six"),
             optionSelected = carLoanViewModel.yearsLeft,
             onSelect = { carLoanViewModel.yearsLeft = it}  //it is the parameter of the function which is option
@@ -220,7 +220,7 @@ fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanVie
         modifier = modifier.padding(5.dp)
     ) {
         Row (
-            horizontalArrangement = Arrangement.Start,
+            horizontalArrangement = Arrangement.SpaceBetween,
 //            verticalAlignment = Alignment.Top,
             modifier = modifier.padding(0.dp).fillMaxWidth()
         ) {
@@ -228,7 +228,7 @@ fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanVie
                 text = "Car Loan Calculator",
                 fontWeight = FontWeight.Bold,
                 fontSize = 40.sp,
-                modifier = Modifier.padding(end = 300.dp)
+//                modifier = Modifier.padding(end = 300.dp)
             )
 
             Button (
@@ -237,7 +237,7 @@ fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanVie
                     carLoanViewModel.monthlyPayment = calcMonthlyPayment(carLoanViewModel.price.toDouble(),
                         carLoanViewModel.downPayment.toDouble(), carLoanViewModel.iRate/100/12, carLoanViewModel.yearsLeft)
                 },
-                modifier = Modifier.width(200.dp)
+                modifier = Modifier.width(200.dp).padding(end = 25.dp)
             ) {
                 Text("Compute")
             }
@@ -258,7 +258,7 @@ fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanVie
                 keyboardOptions = KeyboardOptions (
                     keyboardType = KeyboardType.Number
                 ),
-                modifier = Modifier.size(200.dp, 25.dp).padding(end = 10.dp)
+                modifier = Modifier.size(200.dp, 50.dp).padding(end = 10.dp)
             )
             TextField (
                 value = carLoanViewModel.downPayment,
@@ -270,7 +270,7 @@ fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanVie
                 keyboardOptions = KeyboardOptions (
                     keyboardType = KeyboardType.Number
                 ),
-                modifier = Modifier.size(200.dp, 25.dp)
+                modifier = Modifier.size(200.dp, 50.dp)
             )
         }
 
@@ -301,7 +301,7 @@ fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanVie
 
 
             //timeLeft
-            val radioOptions = listOf ("3", "4", "5", "6")
+//            val radioOptions = listOf ("3", "4", "5", "6")
 //        Text (
 //            text = "Years Remaining: "
 //        )
@@ -313,35 +313,39 @@ fun CarLoanLandscape(modifier: Modifier = Modifier, carLoanViewModel: CarLoanVie
 //        )
 
         Row (
-            modifier = modifier.padding(10.dp)
+            modifier = modifier.padding(0.dp)
         ) {
             //builds radio buttons
-            RadioGroup(
+            RadioGroupLandScape(
                 radioOptions = listOf("Three", "Four", "Five", "Six"),
                 optionSelected = carLoanViewModel.yearsLeft,
-                onSelect = { carLoanViewModel.yearsLeft = it}  //it is the parameter of the function which is option
+                onSelect = { carLoanViewModel.yearsLeft = it}  //it is the parameter of the function which is optiom
             )
-        }
-
-
 
             //format and output variables
             carLoanViewModel.monthlyPayment = "%.2f".format(carLoanViewModel.monthlyPayment).toDouble()
-//        Text("Price: ${carLoanViewModel.price}")
-//        Text("Down Payment: ${carLoanViewModel.downPayment}")
-//        Text("Interest Rate: ${carLoanViewModel.iRate}")
-//        Text("Years Remaining: ${carLoanViewModel.yearsLeft}")
-//    Row (
-//        modifier = modifier.padding(10.dp)
-//    ) {
             Text(
                 text = buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("Monthly Payment: ")
                     }
                     append("$${carLoanViewModel.monthlyPayment}")
-                }
+                },
+                textAlign = TextAlign.End,
+                modifier = Modifier.fillMaxWidth().padding(end = 25.dp, top = 35.dp )
             )
+        }
+
+
+
+//        Text("Price: ${carLoanViewModel.price}")
+//        Text("Down Payment: ${carLoanViewModel.downPayment}")
+//        Text("Interest Rate: ${carLoanViewModel.iRate}")
+//        Text("Years Remaining: ${carLoanViewModel.yearsLeft}")
+//    Row (
+//        modifier = modifier.padding(0.dp)
+//    ) {
+
 
 //        var callFcn by remember { mutableStateOf(false) }
 
@@ -374,13 +378,50 @@ fun calcMonthlyPayment(pr: Double, dp: Double, iR: Float, yearsString: String): 
 
 //In order to hoist, add 2 parameters. optionSelected and the function onSelect
 @Composable                                                        //fcn is given a string a returns nothing. Simply updates a variable.
-fun RadioGroup(radioOptions: List<String>, optionSelected: String, onSelect: (String) -> Unit) {
+fun RadioGroupLandScape(radioOptions: List<String>, optionSelected: String, onSelect: (String) -> Unit) {
+    //Problem: need this variable in CarLoanScreen function in order to pass it through the
+    //calcMonthlyPayment function. This is used to tell how many years are left on the loan.
+    //Solution: Hoisting. Copy and pass in needed function
+//    var optionSelected by remember { mutableStateOf("4") }
+    Row(
+        modifier = Modifier.padding(0.dp)
+    ) {
+        //bad practice to have three copy and pasted rows --> so use a loop and list
+        radioOptions.forEach { option ->
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.selectable (
+                    selected = option == optionSelected,
+                    onClick = {
+    //                        optionSelected = option   //before hoisting
+                        onSelect(option)            //after hoisting
+                    },
+                    role = Role.RadioButton
+                ).padding(8.dp)
+            ) {
+                    RadioButton(
+                        selected = option == optionSelected,
+                        onClick = null,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    Text(
+                        text = option
+                    )
+            }
+
+        }
+
+    }
+}
+
+@Composable                                                        //fcn is given a string a returns nothing. Simply updates a variable.
+fun RadioGroupPortrait(radioOptions: List<String>, optionSelected: String, onSelect: (String) -> Unit) {
     //Problem: need this variable in CarLoanScreen function in order to pass it through the
     //calcMonthlyPayment function. This is used to tell how many years are left on the loan.
     //Solution: Hoisting. Copy and pass in needed function
 //    var optionSelected by remember { mutableStateOf("4") }
     Column(
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier.padding(0.dp)
     ) {
         //bad practice to have three copy and pasted rows --> so use a loop and list
         radioOptions.forEach { option ->
@@ -389,21 +430,22 @@ fun RadioGroup(radioOptions: List<String>, optionSelected: String, onSelect: (St
                 modifier = Modifier.selectable (
                     selected = option == optionSelected,
                     onClick = {
-//                        optionSelected = option   //before hoisting
+                        //                        optionSelected = option   //before hoisting
                         onSelect(option)            //after hoisting
                     },
                     role = Role.RadioButton
                 ).padding(8.dp)
             ) {
-                RadioButton (
+                RadioButton(
                     selected = option == optionSelected,
                     onClick = null,
                     modifier = Modifier.padding(end = 8.dp)
                 )
-                Text (
+                Text(
                     text = option
                 )
             }
+
         }
 
     }
